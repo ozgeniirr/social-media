@@ -1,0 +1,53 @@
+// prisma/schema.prisma
+
+// 1. Veritabanı bağlantısı
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 2. Prisma Client jeneratörü
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  role      Role      @default(USER)    
+  createdAt DateTime  @default(now())
+
+  posts     Post[]    @relation("UserPosts")
+  comments  Comment[] @relation("UserComments")
+}
+
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime  @default(now())
+
+  author    User      @relation("UserPosts", fields: [authorId], references: [id])
+  authorId  Int
+
+  comments  Comment[] @relation("PostComments")
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String
+  createdAt DateTime  @default(now())
+
+  post      Post      @relation("PostComments", fields: [postId], references: [id])
+  postId    Int
+
+  author    User      @relation("UserComments", fields: [authorId], references: [id])
+  authorId  Int
+}
