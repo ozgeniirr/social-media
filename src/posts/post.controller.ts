@@ -1,4 +1,4 @@
-import { createPostService } from "./post.service";
+import { createPostService, getAllPostsService } from "./post.service";
 import { Response, Request } from "express";
 import { createPostSchema } from "../validators/post.validator";
 
@@ -26,5 +26,20 @@ export const createPost = async( req:Request, res:Response): Promise<any> => {
         })
     }
 
+
+}
+
+export const getAllPosts = async(req:Request, res:Response): Promise<any> => {
+    
+    try{
+        const posts = await getAllPostsService()
+        return res.status(200).json({
+            message:"Tüm postlar: ", posts
+        })
+    
+    }catch(error:any){
+        return res.status(500).json({message:"Sunucu hatası"})
+
+    }
 
 }

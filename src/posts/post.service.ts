@@ -8,6 +8,13 @@ export const createPostService = async(title:string, content:string, authorId:nu
         data: {title, content, authorId }
 
     })
-
     return post;
+}
+
+
+export const getAllPostsService = async()=>{
+    const posts = await prisma.post.findMany({
+        include:{author:true}
+    });
+    return posts;
 }
