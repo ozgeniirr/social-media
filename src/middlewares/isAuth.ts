@@ -1,6 +1,5 @@
-import { Request, Response, NextFunction} from "express";
-import { verifyToken } from "../utils/jwt"; 
-
+import { Request, Response, NextFunction } from "express";
+import { verifyToken } from "../utils/jwt";   
 
 declare module "express" {
   export interface Request {
@@ -8,26 +7,19 @@ declare module "express" {
   }
 }
 
-export const isAuth = async(req:Request, res:Response, next:NextFunction) => {
-    const authHeader = req.headers['authorization']
-    if(!authHeader){
-        return res.status(401).json({
-            message:"Token bulunamadı"
-        })
-        
-    }
-    const token = authHeader.split(" ")[1];
+export const isAuth = async (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    return res.status(401).json({ message: "Token bulunamadı" });
+  }
 
-    try{
+  const token = authHeader.split(" ")[1];
 
-        const vToken =  await verifyToken(token);
-        req.user= vToken;
-        next();
-
-    }catch(error:any){
-        return res.status(401).json({ message: "Geçersiz veya süresi dolmuş token" });
-
-    }
-
-}
-
+  try {
+    const payload = await verifyToken(token); // ✅ burada kendi fonksiyonunu kullanıyorsun
+    req.user = payload;                      // payload zaten { userId, email, role }
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Geçersiz veya süresi dolmuş token" });
+  }
+};
