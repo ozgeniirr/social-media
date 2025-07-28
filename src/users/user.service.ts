@@ -88,3 +88,28 @@ export const getFeedService = async(userId:number)=>{
 
     return post;
 }
+
+
+export const getUserPostsService = async(userId:number ) => {
+
+    const userPosts = await prisma.post.findMany({
+        where:{
+            authorId:userId
+        },
+        include:{
+            author:{
+                select:{
+                    id:true,
+                    email:true,
+                    role:true
+                }
+            }
+        }
+    });
+
+    if(userPosts.length===0){
+        throw new Error("POSTS_NOT_FOUND")
+    }
+    return userPosts;
+
+}

@@ -23,11 +23,13 @@ export const registerUser = async(req:Request, res:Response):Promise<any> => {
                 message:"Bu email zaten kayıtlı"
             });
         }
-
-        return res.status(500).json({message:"Sunucu hatası"})
-    }
-
-}
+        console.error("❌ Sunucu hatası:", {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
+        return res.status(500).json({ message: "Sunucu hatası", error: error.message });
+    }}
 
 export const loginUser = async(req:Request, res:Response): Promise<any> => {
     const parsed = loginSchema.safeParse(req.body);

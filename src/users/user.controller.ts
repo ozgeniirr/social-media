@@ -1,5 +1,6 @@
 import { Response, Request } from "express";
-import { createFollowService, deleteFollowService, getFeedService } from "./user.service";
+import { createFollowService, deleteFollowService, getFeedService, getUserPostsService } from "./user.service";
+import redis from "../config/redis";
 
 
 export const createFollow = async( req:Request, res:Response):Promise<any> => {
@@ -66,5 +67,40 @@ export const getFeed = async( req:Request, res:Response):Promise<any> => {
     }
 
 
+}
+
+export const getUserPostsController = async (req:Request, res:Response): Promise<any> => {
+    try{
+
+        const userId = req.user!.userId;
+
+        const cacheKey = `posts:user:${userId}`;
+        console.log("Redis key: ", cacheKey);
+
+        const cached = await redis.get(cacheKey);
+        if(cached){
+            console.log("Redis cache den veri döndü");
+            return res.status(200).json({message:"Kendi postlarınız (cache): ",
+                posts: JSON.parse(cached)
+            });
+        }
+
+        const posts = await getUserPostsService(userId);
+        console.log("Db den alındı", posts);
+
+
+        await redis.set(cacheKey, JSON.stringify(posts), "EX", 60);
+        console.log("DB den alındı redis e yazıldı.");
+        return res.status(200).json({
+            message:"Kendinize ait tüm postlar: ", posts
+        })
+
+    }catch(error:any){
+        if(error.message==="POSTS_NOT_FOUND"){
+            return res.status(404).json({message:"Hiç Post bulunamadı."})
+        }
+
+        return res.status(500).json({message:"Sunucu hatası."});
+    }
 
 }
