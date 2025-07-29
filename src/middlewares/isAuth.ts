@@ -16,10 +16,12 @@ export const isAuth = async (req: Request, res: Response, next: NextFunction) =>
   const token = authHeader.split(" ")[1];
 
   try {
-    const payload = await verifyToken(token); // ✅ burada kendi fonksiyonunu kullanıyorsun
-    req.user = payload;                      // payload zaten { userId, email, role }
+    const payload = await verifyToken(token); 
+    req.user = payload;                      
     next();
   } catch (error) {
     return res.status(401).json({ message: "Geçersiz veya süresi dolmuş token" });
   }
 };
+
+

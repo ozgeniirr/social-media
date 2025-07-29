@@ -8,7 +8,8 @@ datasource db {
 
 // 2. Prisma Client jeneratörü
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
 }
 
 enum Role {

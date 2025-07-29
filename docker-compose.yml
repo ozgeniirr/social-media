@@ -23,6 +23,8 @@ services:
     depends_on:
       - database
     command: npm run dev
+    volumes:
+    - .:/app
 
 volumes:
   pgdata:

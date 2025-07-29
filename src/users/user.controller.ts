@@ -1,6 +1,7 @@
 import { Response, Request } from "express";
 import { createFollowService, deleteFollowService, getFeedService, getUserPostsService } from "./user.service";
 import redis from "../config/redis";
+import { getIo } from "../socket";
 
 
 export const createFollow = async( req:Request, res:Response):Promise<any> => {
@@ -9,7 +10,18 @@ export const createFollow = async( req:Request, res:Response):Promise<any> => {
         const followingId= Number(req.params.id);
         const cFollow = await createFollowService(followerId, followingId);
 
-        return res.status(201).json({message:"Takip edildi ", cFollow})
+
+        const io = getIo();
+
+        io.to(`user:${followingId}`).emit("notification", {
+            type:"follow",
+            fromUserId: followerId,
+            message:`User ${followerId} started following you`,
+        });
+
+
+
+        return res.status(201).json({message:"Takip edildi ", cFollow});
 
     }catch(error:any){
         if(error.message==="SELF_FOLLOW_NOT_ALLOWED"){
@@ -18,10 +30,13 @@ export const createFollow = async( req:Request, res:Response):Promise<any> => {
             return res.status(400).json({message:"Zaten takip ediliyor "})
         };
 
-        return res.status(500).json({message:"Sunucu hatası "})
+        return res.status(500).json({message:"Sunucu hatası ", error: error.message})
     };
 
 }
+        setTimeout(() => {console.log("🧪 io var mı? ", getIo()) 
+        }, 5000);
+
 
 export const deleteFollow = async( req:Request, res:Response): Promise<any> => {
     try{
